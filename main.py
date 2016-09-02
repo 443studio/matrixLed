@@ -56,7 +56,7 @@ def flashLed():
         for a in range(0,8):
             GPIO.output(anList[a],GPIO.LOW)
 
-    i = threading.Timer(0.000001, flashLed)
+    i = threading.Thread(target = flashLed)
     i.start()
     global i
 
@@ -64,7 +64,7 @@ def moveLedptn(ptnfile, ne):
     global drawList
     for i in range(0,ne):
         drawList = ptnfile[i]
-        sleep(0.05)
+        sleep(0.07)
 
 def readPtnfile():
     a = raw_input(":")
