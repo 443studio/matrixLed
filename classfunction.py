@@ -35,7 +35,6 @@ class chgLed:   #change
         print(self.maxframe)
 
     def main(self):
-        self.maxframe = 3   #test
         if self.nowframe >= self.maxframe :
             self.nowframe = 0
         else:
@@ -54,7 +53,7 @@ class chgLed:   #change
         ledptn = ledptnfile.read()
         ledptnfile.close()
         exec("self.timeList = " + ledptn)
-        self.maxframe = self.getmaxframe()
+        self.getmaxframe()
 
 def flashLed():
     drawList = changeList.getLedPtn()
@@ -69,8 +68,8 @@ def flashLed():
             for x in range(0,LEDSIZE):
                 if drawList[y][x] == step:
                     GPIO.output(anList[x],GPIO.LOW)
-
         GPIO.output(ctList[y],GPIO.HIGH)
+        
         for a in range(0,8):
             GPIO.output(anList[a],GPIO.LOW)
 
@@ -84,7 +83,9 @@ try:
     changeList.readPtnfile()
     changeList.main()
     flashLed()
+    
     while True:
+        print(changeList.maxframe) 
         sleep(0.001)
 
 except KeyboardInterrupt:
