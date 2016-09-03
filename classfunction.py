@@ -10,10 +10,9 @@ LEDSIZE = 8
 y = 1
 n = 0
 
-def GPIOsetup():                             #OK
+def GPIOsetup():
     GPIO.setmode(GPIO.BCM)
     for i in range(0,8):
-        
         GPIO.setup(anList[i],GPIO.OUT)
         GPIO.setup(ctList[i],GPIO.OUT)
     for i in range(0,LEDSIZE):
@@ -28,32 +27,32 @@ class chgLed:   #change
         self.maxframe = 0
         self.nowframe = 0
         
-    def getmaxframe(self):
-        for i in self.timeList:
-            self.maxframe += 1
-        self.maxframe = self.maxframe -1
-        print(self.maxframe)
+    def getmaxframe(self,tl):   #timelist tl
+        mf = -1
+        for i in tl:
+            mf += 1
+
+        return mf      #maxframe mf
 
     def main(self):
         if self.nowframe >= self.maxframe :
             self.nowframe = 0
         else:
             self.nowframe += 1
-        print(self.nowframe)
         self.drawList = self.timeList[self.nowframe]
-        a = threading.Timer(0.08,self.main)
+        a = threading.Timer(self.wait,self.main)
         a.start()
         
     def getLedPtn(self):
         return self.drawList
 
-    def readPtnfile(self):
+    def readPtn(self):
         a = raw_input(":")
         ledptnfile = open(a + ".ledptn")
         ledptn = ledptnfile.read()
         ledptnfile.close()
         exec("self.timeList = " + ledptn)
-        self.getmaxframe()
+        self.maxframe = self.getmaxframe(self.timeList)
 
 def flashLed():
     drawList = changeList.getLedPtn()
@@ -80,14 +79,15 @@ def flashLed():
 GPIOsetup()
 try:
     changeList = chgLed()
-    changeList.readPtnfile()
+    changeList.readPtn()
+    changeList.wait = input()
     changeList.main()
     flashLed()
     
-    while True:
-        print(changeList.maxframe) 
+    while True: 
         sleep(0.001)
 
 except KeyboardInterrupt:
     i.cancel
+    a.cancel
     GPIO.cleanup()
