@@ -1,3 +1,4 @@
+
 import RPi.GPIO as GPIO
 import threading
 from time import sleep
@@ -12,7 +13,7 @@ n = 0
 
 def GPIOsetup():
     GPIO.setmode(GPIO.BCM)
-    for i in range(0,8):
+    for i in range(0,LEDSIZE):
         GPIO.setup(anList[i],GPIO.OUT)
         GPIO.setup(ctList[i],GPIO.OUT)
     for i in range(0,LEDSIZE):
@@ -23,13 +24,13 @@ def GPIOsetup():
 class chgLed:   #change
     def __init__ (self):
         self.drawList = []
-        self.timeList = []
+        self.prtList = []  #parentList
         self.maxframe = 0
         self.nowframe = 0
         
-    def getmaxframe(self,tl):   #timelist tl
+    def getmaxframe(self,prtList):
         mf = -1
-        for i in tl:
+        for i in prtList:
             mf += 1
 
         return mf      #maxframe mf
@@ -39,7 +40,7 @@ class chgLed:   #change
             self.nowframe = 0
         else:
             self.nowframe += 1
-        self.drawList = self.timeList[self.nowframe]
+        self.drawList = self.prtList[self.nowframe]
         a = threading.Timer(self.wait,self.main)
         a.start()
         
@@ -51,8 +52,16 @@ class chgLed:   #change
         ledptnfile = open(a + ".ledptn")
         ledptn = ledptnfile.read()
         ledptnfile.close()
-        exec("self.timeList = " + ledptn)
-        self.maxframe = self.getmaxframe(self.timeList)
+        exec("self.prtList = " + ledptn)
+        self.maxframe = self.getmaxframe(self.prtList)
+
+    def setLedPtn(self):            #test
+        z = input("frame:")
+        x = input("x:")
+        y = input("y:")
+        a = input("akarusa:")
+        self.wait = input("wait:")
+        self.prtList[z][y][x] = a
 
 def flashLed():
     drawList = changeList.getLedPtn()
@@ -84,8 +93,10 @@ try:
     changeList.main()
     flashLed()
     
-    while True: 
-        sleep(0.001)
+
+    while True:
+        changeList.setLedPtn()
+        sleep(0.01)
 
 except KeyboardInterrupt:
     i.cancel
