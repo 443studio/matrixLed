@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #control matrixLed 16x16 by Shift Resister(74hc595)
-#2016/10/25 Ver3.0
+#2016/10/28 Ver3.01
 
 import RPi.GPIO as GPIO
 import time
@@ -18,19 +18,18 @@ def setup():
     GPIO.setmode(GPIO.BCM)
     for i in range(1,7):
         GPIO.setup(i, GPIO.OUT)
-    for i in range(1,7):
         GPIO.output(i,GPIO.LOW)
 
 class matrixSResister:
     def __init__(self):
-        self.drawList = []
+        self.drawList = [[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],]
 
     def shift(self, PIN):
         GPIO.output(PIN,GPIO.HIGH)
         GPIO.output(PIN,GPIO.LOW)
     
     def send(self, data, axis):
-        pin = lambda a, b: a + b
+        pin = lambda a, b: a + "_" + b
         for i in range(16):
             if ((1 << i ) & data) == 0:
                 GPIO.output(pin(axis, "SI"), GPIO.LOW)
@@ -43,19 +42,21 @@ class matrixSResister:
         shift(Ct_RCK)
 
     def flashLed(self,name):
-    reset()
-    ct = 1
-    for x in range(0,16):
-        send_bits(ct,"Ct")
-        send_bits(self.drawList[x],"An")
-        reflect()
-        time.sleep(0.000001)
-        ct = ct << 1
-    if loop_flag == True:
-        threading.Thread(target= name+"flashLed")
-    else:
-        send_bits(0)
-        reflect()
+        ct = 65534
+        for x in range(0,16):
+            send(ct,"Ct")
+            send(self.drawList[x],"An")
+            reflect()
+            time.sleep(0.000001)
+            ct = ((ct-32768) << 1) +1
+        if loop_flag:
+            threading.Thread(target= self.flashLed)
+        else:
+            send_bits(0)
+            reflect()
+            
+    def pushList(self,newList):
+        self.drawList = newList
 
 dummyList = [[21845],
              [43690],
@@ -77,11 +78,12 @@ dummyList = [[21845],
 try:
     setup()
     mtrLed = matrixSResiter()
-    mtrLed.drawList = dummyList
+    mtrLed.pushList(dummyList)
     mtrLed.flashLed()
     while True:
         sleep(0.5)
 
 except KeyboardInterrupt:
     loop_flag = False
+    time.sleep(0.1)
     GPIO.cleanup()
