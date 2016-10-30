@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #control matrixLed 16x16 by Shift Resister(74hc595)
-#2016/10/29 Ver3.1
+#2016/10/29 Ver3.11
+#
 
 import RPi.GPIO as GPIO
 import time
@@ -27,7 +28,7 @@ class matrixSResister:
         self.drawList =
 [[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],]
 
-    def shift(self, PIN,PIN2):
+    def shift(self, PIN):
         GPIO.output(PIN,GPIO.HIGH)
         GPIO.output(PIN,GPIO.LOW)
 
@@ -40,8 +41,10 @@ class matrixSResister:
             self.shift(axis[self.SCK])
 
     def reflect(self):
-        self.shift(self.Ct[self.RCK])
-        self.shift(self.An[self.RCK])
+        GPIO.output(self.An[self.RCK],GPIO.HIGH)
+        GPIO.output(self.Ct[self.RCK],GPIO.HIGH)
+        GPIO.output(self.An[self.RCK],GPIO.LOW)
+        GPIO.output(self.Ct[self.RCK],GPIO.LOW)
 
     def flashLed(self):
         ctptn = 65534
@@ -89,5 +92,5 @@ try:
 
 except KeyboardInterrupt:
     mtrLed.loop_flag = False
-    time.sleep(5)
+    time.sleep(0.3)
     GPIO.cleanup()
